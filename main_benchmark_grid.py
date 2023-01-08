@@ -31,7 +31,11 @@ def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
         drop_last=True,
     )
     if num_fetch_workers != 0:
-        dataloader = ConcurrentDataLoader(num_fetch_workers=num_fetch_workers, **dataloader_kwargs)
+        dataloader = ConcurrentDataLoader(
+            num_fetch_workers=num_fetch_workers,
+            fetch_impl="asyncio",
+            **dataloader_kwargs,
+        )
     else:
         dataloader = TorchDataLoader(**dataloader_kwargs)
 
