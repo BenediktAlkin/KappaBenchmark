@@ -2,12 +2,15 @@ from kappaprofiler import Stopwatch
 from dataclasses import dataclass
 from torch.utils.data import DataLoader
 from time import sleep
+import math
 
 @dataclass
 class BenchmarkDataloaderResult:
     num_workers: int
     prefetch_factor: int
+    num_epochs: int
     num_batches: int
+    batches_per_epoch: int
     total_time: float
     iter_times: list
     batch_times: list
@@ -41,6 +44,23 @@ class BenchmarkDataloaderResult:
     @property
     def mean_batch_time_cleaned(self):
         return self.total_batch_time_cleaned / len(self.batch_times_cleaned)
+
+    def to_string_lines(self):
+        lines = []
+        if self.num_batches is not None:
+            lines.append(f"loaded {self.num_epochs} epochs")
+        time_lines = [
+            ("{}s total_time", self.total_time),
+            ("{}s total_batch_time", self.total_batch_time),
+            ("{}s mean_batch_time", self.mean_batch_time),
+            (f"{{}}s total_batch_time_cleaned (num_workers={self.num_workers})", self.total_batch_time_cleaned),
+            (f"{{}}s mean_batch_time_cleaned (num_workers={self.num_workers})", self.mean_batch_time_cleaned),
+        ]
+        max_digits = max(int(math.log10(tl[1])) for tl in time_lines)
+        format_str = f"{{:{max_digits+4}.2f}}"
+        for i in range(len(time_lines)):
+            lines.append(time_lines[i][0].format(format_str.format(time_lines[i][1])))
+        return lines
 
 
 def benchmark_dataloading(
@@ -91,8 +111,10 @@ def benchmark_dataloading(
     return BenchmarkDataloaderResult(
         num_workers=dataloader.num_workers,
         prefetch_factor=dataloader.prefetch_factor,
+        num_epochs=num_epochs,
         num_batches=num_batches,
-        total_time=total_sw,
+        batches_per_epoch=len(dataloader),
+        total_time=total_sw.elapsed_time,
         iter_times=iter_times,
         batch_times=batch_times,
     )
