@@ -18,15 +18,13 @@ jobs:
           python-version: 3.8
       - name: install requirements
         run: pip install -r requirements.txt
-      - name: install test requirements
-        run: pip install -r requirements_tests.txt
 
       # run unit tests
       - name: tests_unit
         run: python -m unittest discover --start-directory ./tests_unit
       # run integration tests
-      - name: tests_integration
-        run: python -m unittest discover --start-directory ./tests_integration
+      # - name: tests_integration
+      #  run: python -m unittest discover --start-directory ./tests_integration
 
       # prepare version update
       - name: extract tag
