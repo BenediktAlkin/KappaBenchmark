@@ -69,10 +69,14 @@ def benchmark_dataloading(
         num_batches: int = None,
         after_create_iter_fn=None,
         after_load_batch_fn=None,
+        total_num_batches_callback=None,
+        after_load_batch_callback=None,
 ):
     assert (num_batches is None) ^ (num_epochs is None), "define benchmark duration via num_epochs or num_batches"
     if num_batches is None:
         num_batches = num_epochs * len(dataloader)
+    if total_num_batches_callback is not None:
+        total_num_batches_callback(num_batches)
     
     epoch_counter = 0
     batch_counter = 0
@@ -103,6 +107,8 @@ def benchmark_dataloading(
                     break
                 if after_load_batch_fn is not None:
                     after_load_batch_fn()
+                if after_load_batch_callback is not None:
+                    after_load_batch_callback(epoch_counter, batch_counter)
                 batch_counter += 1
             epoch_counter += 1
             if num_epochs is not None and epoch_counter >= num_epochs:
