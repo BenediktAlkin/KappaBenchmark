@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from torch.utils.data import DataLoader
 from time import sleep
 import math
+from tqdm import tqdm
 
 @dataclass
 class BenchmarkDataloaderResult:
@@ -47,7 +48,7 @@ class BenchmarkDataloaderResult:
 
     def to_string_lines(self):
         lines = []
-        if self.num_batches is not None:
+        if self.num_epochs is not None:
             lines.append(f"loaded {self.num_epochs} epochs")
         lines.append(f"loaded {self.num_batches} batches")
         time_lines = [
@@ -70,14 +71,10 @@ def benchmark_dataloading(
         num_batches: int = None,
         after_create_iter_fn=None,
         after_load_batch_fn=None,
-        total_num_batches_callback=None,
-        after_load_batch_callback=None,
 ):
     assert (num_batches is None) ^ (num_epochs is None), "define benchmark duration via num_epochs or num_batches"
     if num_batches is None:
         num_batches = num_epochs * len(dataloader)
-    if total_num_batches_callback is not None:
-        total_num_batches_callback(num_batches)
     
     epoch_counter = 0
     batch_counter = 0
@@ -85,35 +82,35 @@ def benchmark_dataloading(
     iter_times = []
     batch_times = []
 
-    with Stopwatch() as total_sw:
-        terminate = False
-        while not terminate:
-            # iterator
-            with stopwatch:
-                dataloader_iter = iter(dataloader)
-            iter_times.append(stopwatch.last_lap_time)
-            if after_create_iter_fn is not None:
-                after_create_iter_fn()
+    with tqdm(total=num_batches) as pbar:
+        with Stopwatch() as total_sw:
+            terminate = False
+            while not terminate:
+                # iterator
+                with stopwatch:
+                    dataloader_iter = iter(dataloader)
+                iter_times.append(stopwatch.last_lap_time)
+                if after_create_iter_fn is not None:
+                    after_create_iter_fn()
 
-            while True:
-                if batch_counter >= num_batches:
-                    terminate = True
+                while True:
+                    if batch_counter >= num_batches:
+                        terminate = True
+                        break
+                    # load batch
+                    try:
+                        with stopwatch:
+                            next(dataloader_iter)
+                        batch_times.append(stopwatch.last_lap_time)
+                    except StopIteration:
+                        break
+                    if after_load_batch_fn is not None:
+                        after_load_batch_fn()
+                    batch_counter += 1
+                    pbar.update(1)
+                epoch_counter += 1
+                if num_epochs is not None and epoch_counter >= num_epochs:
                     break
-                # load batch
-                try:
-                    with stopwatch:
-                        next(dataloader_iter)
-                    batch_times.append(stopwatch.last_lap_time)
-                except StopIteration:
-                    break
-                if after_load_batch_fn is not None:
-                    after_load_batch_fn()
-                if after_load_batch_callback is not None:
-                    after_load_batch_callback(epoch_counter, batch_counter)
-                batch_counter += 1
-            epoch_counter += 1
-            if num_epochs is not None and epoch_counter >= num_epochs:
-                break
 
     return BenchmarkDataloaderResult(
         num_workers=dataloader.num_workers,
