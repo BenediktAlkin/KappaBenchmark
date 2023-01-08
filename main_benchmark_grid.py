@@ -27,7 +27,6 @@ def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
         dataset=dataset,
         batch_size=batch_size,
         num_workers=num_workers,
-        persistent_workers=num_workers > 0,
         drop_last=True,
     )
     if num_fetch_workers != 0:
@@ -37,7 +36,10 @@ def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
             **dataloader_kwargs,
         )
     else:
-        dataloader = TorchDataLoader(**dataloader_kwargs)
+        dataloader = TorchDataLoader(
+            persistent_workers=num_workers > 0,
+            **dataloader_kwargs,
+        )
 
     return dict(dataloader=dataloader, **kwargs)
 
