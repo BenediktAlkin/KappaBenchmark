@@ -46,7 +46,7 @@ def run_benchmark_grid(
             else:
                 run_kwargs = setup_fn(**variant, **kwargs)
             if on_variant_starts is not None:
-                on_variant_starts(i=i, count=len(variant), name=variant_name, **variant)
+                on_variant_starts(i=i, count=len(variants), name=variant_name, **variant)
             result = run_fn(**run_kwargs)
         except Exception as e:
             result = str(e)
