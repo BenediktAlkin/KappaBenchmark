@@ -90,7 +90,7 @@ def benchmark_dataloading(
             # iterator
             with stopwatch:
                 dataloader_iter = iter(dataloader)
-            iter_times.append(stopwatch.elapsed_seconds)
+            iter_times.append(stopwatch.last_lap_time)
             if after_create_iter_fn is not None:
                 after_create_iter_fn()
 
@@ -102,7 +102,7 @@ def benchmark_dataloading(
                 try:
                     with stopwatch:
                         next(dataloader_iter)
-                    batch_times.append(stopwatch.elapsed_seconds)
+                    batch_times.append(stopwatch.last_lap_time)
                 except StopIteration:
                     break
                 if after_load_batch_fn is not None:
