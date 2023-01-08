@@ -6,7 +6,7 @@ from time import sleep
 @dataclass
 class BenchmarkDataloaderResult:
     num_workers: int
-    prefetch_facotr: int
+    prefetch_factor: int
     num_batches: int
     total_time: float
     iter_times: list
@@ -47,7 +47,8 @@ def benchmark_dataloading(
         dataloader: DataLoader,
         num_epochs: int = None,
         num_batches: int = None,
-        # TODO delay functions
+        after_create_iter_fn=None,
+        after_load_batch_fn=None,
 ):
     assert (num_batches is None) ^ (num_epochs is None), "define benchmark duration via num_epochs or num_batches"
     if num_batches is None:
@@ -66,6 +67,9 @@ def benchmark_dataloading(
             with stopwatch:
                 dataloader_iter = iter(dataloader)
             iter_times.append(stopwatch.elapsed_seconds)
+            if after_create_iter_fn is not None:
+                after_create_iter_fn()
+
             while True:
                 if batch_counter >= num_batches:
                     terminate = True
@@ -77,6 +81,8 @@ def benchmark_dataloading(
                     batch_times.append(stopwatch.elapsed_seconds)
                 except StopIteration:
                     break
+                if after_load_batch_fn is not None:
+                    after_load_batch_fn()
                 batch_counter += 1
             epoch_counter += 1
             if num_epochs is not None and epoch_counter >= num_epochs:
