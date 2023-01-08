@@ -19,7 +19,7 @@ def parse_args():
     duration_group.add_argument("--num_batches", type=str)
     parser.add_argument("--batch_size", type=str, required=True)
     parser.add_argument("--num_workers", type=str, required=True)
-    parser.add_argument("--num_fetch_workers", type=str, default="0")
+    parser.add_argument("--num_fetch_workers", type=str, default="1")
     return vars(parser.parse_args())
 
 def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
