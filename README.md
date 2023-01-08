@@ -16,3 +16,6 @@ result = kbm.benchmark_dataloading(
     num_epochs=...,
 )
 ```
+
+#### predefined benchmarks examples
+- `python main_benchmark_grid.py --benchmark imagefolder --root ROOT --num_epochs 5 --batch_size 256 --num_workers 8,16 --num_fetch_workers 0,2,4`
