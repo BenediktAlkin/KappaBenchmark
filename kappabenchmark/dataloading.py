@@ -49,10 +49,11 @@ class BenchmarkDataloaderResult:
         lines = []
         if self.num_batches is not None:
             lines.append(f"loaded {self.num_epochs} epochs")
+        lines.append(f"loaded {self.num_batches} batches")
         time_lines = [
             ("{}s total_time", self.total_time),
             ("{}s total_batch_time", self.total_batch_time),
-            ("{}s mean_batch_time", self.mean_batch_time),
+            (f"{{}}s mean_batch_time ({self.num_batches} batches)", self.mean_batch_time),
             (f"{{}}s total_batch_time_cleaned (num_workers={self.num_workers})", self.total_batch_time_cleaned),
             (f"{{}}s mean_batch_time_cleaned (num_workers={self.num_workers})", self.mean_batch_time_cleaned),
         ]

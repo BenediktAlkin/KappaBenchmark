@@ -22,8 +22,8 @@ def parse_args():
 def start_pbar(num_batches, container):
     container.append(tqdm(total=num_batches))
 
-def update_pbar(_, update_counter, container):
-    container[0].update(update_counter)
+def update_pbar(_, __, container):
+    container[0].update(1)
 
 def main(root, num_epochs, num_batches, batch_size, num_workers, num_fetch_workers):
     dataset = ImageFolder(
