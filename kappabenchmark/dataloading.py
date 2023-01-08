@@ -11,6 +11,7 @@ class BenchmarkDataloaderResult:
     prefetch_factor: int
     num_epochs: int
     num_batches: int
+    num_samples: int
     batches_per_epoch: int
     total_time: float
     iter_times: list
@@ -51,6 +52,7 @@ class BenchmarkDataloaderResult:
         if self.num_epochs is not None:
             lines.append(f"loaded {self.num_epochs} epochs")
         lines.append(f"loaded {self.num_batches} batches")
+        lines.append(f"loaded {self.num_samples} samples")
         time_lines = [
             ("{}s total_time", self.total_time),
             ("{}s total_batch_time", self.total_batch_time),
@@ -78,6 +80,7 @@ def benchmark_dataloading(
     
     epoch_counter = 0
     batch_counter = 0
+    sample_counter = 0
     stopwatch = Stopwatch()
     iter_times = []
     batch_times = []
@@ -100,8 +103,9 @@ def benchmark_dataloading(
                     # load batch
                     try:
                         with stopwatch:
-                            next(dataloader_iter)
+                            batch = next(dataloader_iter)
                         batch_times.append(stopwatch.last_lap_time)
+                        sample_counter += len(batch)
                     except StopIteration:
                         break
                     if after_load_batch_fn is not None:
@@ -117,6 +121,7 @@ def benchmark_dataloading(
         prefetch_factor=dataloader.prefetch_factor,
         num_epochs=num_epochs,
         num_batches=num_batches,
+        num_samples=sample_counter,
         batches_per_epoch=len(dataloader),
         total_time=total_sw.elapsed_time,
         iter_times=iter_times,

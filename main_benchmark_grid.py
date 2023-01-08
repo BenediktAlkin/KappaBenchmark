@@ -86,7 +86,7 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
             result_str = result.result
         else:
             result_str = f"{result.result.total_time:.2f}"
-        print(f"{i+1}/{len(results.variant_results)}: {result.name}: {result_str}")
+        print(f"{i+1}/{len(results.variant_results)} {result.name}: {result.result.num_samples} samples {result_str}")
 
 
 if __name__ == "__main__":
