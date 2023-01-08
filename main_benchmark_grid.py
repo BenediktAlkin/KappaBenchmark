@@ -64,12 +64,19 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
         print("----------------")
         print(f"{i}/{len(results.variant_results)}: {result.name}")
         print("----------------")
-        for line in result.result.to_string_lines():
-            print(line)
+        if isinstance(result.result, str):
+            print(f"FAILED: {result.result}")
+        else:
+            for line in result.result.to_string_lines():
+                print(line)
     print("----------------")
     print(f"total times")
     for i, result in enumerate(results.variant_results):
-        print(f"{i}/{len(results.variant_results)}: {result.name}: {result.result.total_time:.2f}")
+        if isinstance(result.result, str):
+            result_str = result.result
+        else:
+            result_str = f"{result.result.total_time:.2f}"
+        print(f"{i}/{len(results.variant_results)}: {result.name}: {result_str}")
 
 
 if __name__ == "__main__":
