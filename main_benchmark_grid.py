@@ -43,6 +43,19 @@ def parse_grid_param(param):
     assert isinstance(param, str)
     return yaml.safe_load(f"[{param}]")
 
+def on_variant_starts(i, count, name, **_):
+    print(f"{i+1}/{count}: {name}")
+
+def on_variant_finished(variant_result, i, variant_count):
+    print("----------------")
+    print(f"{i+1}/{variant_count}: {variant_result.name}")
+    print("----------------")
+    if isinstance(variant_result.result, str):
+        print(f"FAILED: {variant_result.result}")
+    else:
+        for line in variant_result.result.to_string_lines():
+            print(line)
+
 def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_fetch_workers):
     dataset = BENCHMARKS[benchmark](root=str(Path(root).expanduser()))
 
@@ -59,16 +72,9 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
         run_fn=benchmark_dataloading,
         setup_fn=setup_fn,
         dataset=dataset,
+        on_variant_starts=on_variant_starts,
+        on_variant_finished=on_variant_finished,
     )
-    for i, result in enumerate(results.variant_results):
-        print("----------------")
-        print(f"{i}/{len(results.variant_results)}: {result.name}")
-        print("----------------")
-        if isinstance(result.result, str):
-            print(f"FAILED: {result.result}")
-        else:
-            for line in result.result.to_string_lines():
-                print(line)
     print("----------------")
     print(f"total times")
     for i, result in enumerate(results.variant_results):
@@ -76,7 +82,7 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
             result_str = result.result
         else:
             result_str = f"{result.result.total_time:.2f}"
-        print(f"{i}/{len(results.variant_results)}: {result.name}: {result_str}")
+        print(f"{i+1}/{len(results.variant_results)}: {result.name}: {result_str}")
 
 
 if __name__ == "__main__":
