@@ -1,3 +1,4 @@
 torch
 kappaprofiler
 pyyaml
+torchvision
