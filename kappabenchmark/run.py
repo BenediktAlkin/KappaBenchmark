@@ -1,16 +1,19 @@
-from itertools import product
 from dataclasses import dataclass
+from itertools import product
+
 
 @dataclass
 class RunBenchmarkGridResult:
     parameters: dict
     variant_results: list
 
+
 @dataclass
 class VariantResult:
     name: str
     parameters: dict
     result: object
+
 
 def grid_to_variants(**kwargs) -> list:
     # wrap parameters that are not lists/tuples
@@ -24,8 +27,10 @@ def grid_to_variants(**kwargs) -> list:
         variants.append(dict(zip(kwargs.keys(), variant)))
     return variants
 
+
 def variant_to_name(variant: dict) -> str:
     return " ".join(f"{key}={value}" for key, value in variant.items())
+
 
 def run_benchmark_grid(
         param_grid: dict,

@@ -1,9 +1,11 @@
-from functools import partial
 import unittest
+from functools import partial
+
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from kappabenchmark.dataloading import benchmark_dataloading
+
 
 class TestDataloading(unittest.TestCase):
     def test_asserts(self):

@@ -1,5 +1,7 @@
 import unittest
-from kappabenchmark.run import run_benchmark_grid, grid_to_variants, variant_to_name
+
+from kappabenchmark.run import grid_to_variants, variant_to_name
+
 
 class TestRun(unittest.TestCase):
     def test_grid_to_variants_scalar(self):

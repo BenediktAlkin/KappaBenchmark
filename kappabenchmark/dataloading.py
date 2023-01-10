@@ -1,9 +1,10 @@
-from kappaprofiler import Stopwatch
-from dataclasses import dataclass
-from torch.utils.data import DataLoader
-from time import sleep
 import math
+from dataclasses import dataclass
+
+from kappaprofiler import Stopwatch
+from torch.utils.data import DataLoader
 from tqdm import tqdm
+
 
 @dataclass
 class BenchmarkDataloaderResult:
@@ -61,7 +62,7 @@ class BenchmarkDataloaderResult:
             (f"{{}}s mean_batch_time_cleaned (num_workers={self.num_workers})", self.mean_batch_time_cleaned),
         ]
         max_digits = max(int(math.log10(tl[1])) for tl in time_lines)
-        format_str = f"{{:{max_digits+4}.2f}}"
+        format_str = f"{{:{max_digits + 4}.2f}}"
         for i in range(len(time_lines)):
             lines.append(time_lines[i][0].format(format_str.format(time_lines[i][1])))
         return lines
@@ -77,7 +78,7 @@ def benchmark_dataloading(
     assert (num_batches is None) ^ (num_epochs is None), "define benchmark duration via num_epochs or num_batches"
     if num_batches is None:
         num_batches = num_epochs * len(dataloader)
-    
+
     epoch_counter = 0
     batch_counter = 0
     sample_counter = 0

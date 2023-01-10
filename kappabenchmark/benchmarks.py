@@ -1,6 +1,6 @@
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import CenterCrop, ToTensor, Compose
-from pathlib import Path
+
 
 def imagefolder_benchmark(root):
     return ImageFolder(
@@ -10,6 +10,7 @@ def imagefolder_benchmark(root):
             ToTensor(),
         ])
     )
+
 
 BENCHMARKS = {
     "imagefolder": imagefolder_benchmark,

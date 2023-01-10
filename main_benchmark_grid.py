@@ -1,12 +1,16 @@
-from pathlib import Path
-import yaml
 from argparse import ArgumentParser
-from torch.utils.data import DataLoader as TorchDataLoader
+from functools import partial
+from pathlib import Path
+from time import sleep
+
+import yaml
 from pytorch_concurrent_dataloader import DataLoader as ConcurrentDataLoader
-from kappabenchmark.dataloading import benchmark_dataloading
+from torch.utils.data import DataLoader as TorchDataLoader
+
 from kappabenchmark.benchmarks import BENCHMARKS
-from tqdm import tqdm
+from kappabenchmark.dataloading import benchmark_dataloading
 from kappabenchmark.run import run_benchmark_grid
+
 
 def parse_args():
     parser = ArgumentParser()
@@ -20,7 +24,10 @@ def parse_args():
     parser.add_argument("--batch_size", type=str, required=True)
     parser.add_argument("--num_workers", type=str, required=True)
     parser.add_argument("--num_fetch_workers", type=str, default="1")
+    # delay
+    duration_group.add_argument("--initial_delay", type=int)
     return vars(parser.parse_args())
+
 
 def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
     dataloader_kwargs = dict(
@@ -43,18 +50,21 @@ def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
 
     return dict(dataloader=dataloader, **kwargs)
 
+
 def parse_grid_param(param):
     if param is None:
         return None
     assert isinstance(param, str)
     return yaml.safe_load(f"[{param}]")
 
+
 def on_variant_starts(i, count, name, **_):
-    print(f"{i+1}/{count}: {name}")
+    print(f"{i + 1}/{count}: {name}")
+
 
 def on_variant_finished(variant_result, i, variant_count):
     print("----------------")
-    print(f"{i+1}/{variant_count}: {variant_result.name}")
+    print(f"{i + 1}/{variant_count}: {variant_result.name}")
     print("----------------")
     if isinstance(variant_result.result, str):
         print(f"FAILED: {variant_result.result}")
@@ -62,7 +72,8 @@ def on_variant_finished(variant_result, i, variant_count):
         for line in variant_result.result.to_string_lines():
             print(line)
 
-def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_fetch_workers):
+
+def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_fetch_workers, initial_delay):
     dataset = BENCHMARKS[benchmark](root=str(Path(root).expanduser()))
 
     param_grid = {}
@@ -75,7 +86,7 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
     param_grid["num_fetch_workers"] = parse_grid_param(num_fetch_workers)
     results = run_benchmark_grid(
         param_grid=param_grid,
-        run_fn=benchmark_dataloading,
+        run_fn=partial(benchmark_dataloading, after_create_iter_fn=lambda: sleep(initial_delay or 0)),
         setup_fn=setup_fn,
         dataset=dataset,
         on_variant_starts=on_variant_starts,
@@ -88,7 +99,7 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
             result_str = result.result
         else:
             result_str = f"{result.result.num_samples} samples {result.result.total_time:.2f}"
-        print(f"{i+1}/{len(results.variant_results)} {result.name}: {result_str}")
+        print(f"{i + 1}/{len(results.variant_results)} {result.name}: {result_str}")
 
 
 if __name__ == "__main__":
