@@ -56,7 +56,7 @@ def run_benchmark_grid(
             result=result,
         )
         if on_variant_finished is not None:
-            on_variant_finished(variant_result, i, len(variant))
+            on_variant_finished(variant_result, i, len(variants))
         results.append(variant_result)
 
     return RunBenchmarkGridResult(
