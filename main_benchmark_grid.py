@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument("--num_workers", type=str, required=True)
     parser.add_argument("--num_fetch_workers", type=str, default="1")
     # delay
-    duration_group.add_argument("--initial_delay", type=int)
+    parser.add_argument("--initial_delay", type=int)
     return vars(parser.parse_args())
 
 
