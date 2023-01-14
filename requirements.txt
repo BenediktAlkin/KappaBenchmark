@@ -1,5 +1,7 @@
 torch
 kappaprofiler
+kappadata
 pyyaml
 torchvision
 tqdm
+pytorch_concurrent_dataloader

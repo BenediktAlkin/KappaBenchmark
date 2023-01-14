@@ -7,7 +7,7 @@ import yaml
 from pytorch_concurrent_dataloader import DataLoader as ConcurrentDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
 
-from kappabenchmark.benchmarks import BENCHMARKS
+from kappabenchmark.dataloading_benchmarks import DATALOADING_BENCHMARKS
 from kappabenchmark.dataloading import benchmark_dataloading
 from kappabenchmark.run import run_benchmark_grid
 
@@ -15,7 +15,7 @@ from kappabenchmark.run import run_benchmark_grid
 def parse_args():
     parser = ArgumentParser()
     # benchmark parameters
-    parser.add_argument("--benchmark", type=str, choices=BENCHMARKS.keys(), default="imagefolder")
+    parser.add_argument("--benchmark", type=str, choices=DATALOADING_BENCHMARKS.keys(), default="imagefolder")
     parser.add_argument("--root", type=str)
     # grid parameters
     duration_group = parser.add_mutually_exclusive_group(required=True)
@@ -23,23 +23,25 @@ def parse_args():
     duration_group.add_argument("--num_batches", type=str)
     parser.add_argument("--batch_size", type=str, required=True)
     parser.add_argument("--num_workers", type=str, required=True)
-    parser.add_argument("--num_fetch_workers", type=str, default="1")
+    parser.add_argument("--num_fetch_workers", type=str, default="0")
+    parser.add_argument("--fetch_impl", type=str, choices=["asyncio", "threaded"], default="asyncio")
     # delay
     parser.add_argument("--initial_delay", type=int)
     return vars(parser.parse_args())
 
 
-def setup_fn(dataset, batch_size, num_workers, num_fetch_workers, **kwargs):
+def setup_fn(dataset, collator, batch_size, num_workers, num_fetch_workers, fetch_impl, **kwargs):
     dataloader_kwargs = dict(
         dataset=dataset,
         batch_size=batch_size,
         num_workers=num_workers,
         drop_last=True,
+        collate_fn=collator,
     )
     if num_fetch_workers != 0:
         dataloader = ConcurrentDataLoader(
             num_fetch_workers=num_fetch_workers,
-            fetch_impl="asyncio",
+            fetch_impl=fetch_impl,
             **dataloader_kwargs,
         )
     else:
@@ -73,8 +75,20 @@ def on_variant_finished(variant_result, i, variant_count):
             print(line)
 
 
-def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_fetch_workers, initial_delay):
-    dataset = BENCHMARKS[benchmark](root=str(Path(root).expanduser()))
+def main(
+        benchmark,
+        root,
+        num_epochs,
+        num_batches,
+        batch_size,
+        num_workers,
+        num_fetch_workers,
+        fetch_impl,
+        initial_delay,
+):
+    dataloading_benchmark = DATALOADING_BENCHMARKS[benchmark](root=str(Path(root).expanduser()))
+    dataset = dataloading_benchmark.dataset
+    collator = dataloading_benchmark.collator
 
     param_grid = {}
     if num_epochs is not None:
@@ -84,11 +98,13 @@ def main(benchmark, root, num_epochs, num_batches, batch_size, num_workers, num_
     param_grid["batch_size"] = parse_grid_param(batch_size)
     param_grid["num_workers"] = parse_grid_param(num_workers)
     param_grid["num_fetch_workers"] = parse_grid_param(num_fetch_workers)
+    param_grid["fetch_impl"] = parse_grid_param(fetch_impl)
     results = run_benchmark_grid(
         param_grid=param_grid,
         run_fn=partial(benchmark_dataloading, after_create_iter_fn=lambda: sleep(initial_delay or 0)),
         setup_fn=setup_fn,
         dataset=dataset,
+        collator=collator,
         on_variant_starts=on_variant_starts,
         on_variant_finished=on_variant_finished,
     )
