@@ -114,5 +114,9 @@ def main(
         if isinstance(result.result, str):
             result_str = result.result
         else:
-            result_str = f"{result.result.num_samples} samples {result.result.total_time:.2f}"
+            result_str = (
+                f"{result.result.num_samples} samples "
+                f"{result.result.total_time:.2f} "
+                f"{result.result.total_batch_time_cleaned:.2f}"
+            )
         print(f"{i + 1}/{len(results.variant_results)} {result.name}: {result_str}")
