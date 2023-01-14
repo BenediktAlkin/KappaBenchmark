@@ -5,3 +5,4 @@ pyyaml
 torchvision
 tqdm
 pytorch_concurrent_dataloader
+timm
