@@ -7,8 +7,8 @@ import yaml
 from pytorch_concurrent_dataloader import DataLoader as ConcurrentDataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
 
-from kappabenchmark.dataloading_benchmarks import DATALOADING_BENCHMARKS
 from kappabenchmark.dataloading import benchmark_dataloading
+from kappabenchmark.dataloading_benchmarks import DATALOADING_BENCHMARKS
 from kappabenchmark.run import run_benchmark_grid
 
 

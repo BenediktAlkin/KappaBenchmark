@@ -1,11 +1,12 @@
+from dataclasses import dataclass
+
 import kappadata as kd
-import kappadata.transforms as transforms
 import kappadata.common as common
+import kappadata.transforms as transforms
 import kappadata.wrappers.sample_wrappers as sample_wrappers
+from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import CenterCrop
-from dataclasses import dataclass
-from torch.utils.data import Dataset
 
 
 @dataclass
@@ -46,6 +47,7 @@ def imagefolder_byol_benchmark(root):
             mode="x",
         ),
     )
+
 
 def imagefolder_maefinetune_benchmark(root):
     return DataloadingBenchmark(
