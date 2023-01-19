@@ -86,7 +86,8 @@ def main(
         fetch_impl,
         initial_delay,
 ):
-    dataloading_benchmark = DATALOADING_BENCHMARKS[benchmark](root=str(Path(root).expanduser()))
+    root = str(Path(root).expanduser()) if root is not None else ""
+    dataloading_benchmark = DATALOADING_BENCHMARKS[benchmark](root=root)
     dataset = dataloading_benchmark.dataset
     collator = dataloading_benchmark.collator
 

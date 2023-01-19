@@ -61,7 +61,7 @@ class BenchmarkDataloaderResult:
             (f"{{}}s total_batch_time_cleaned (num_workers={self.num_workers})", self.total_batch_time_cleaned),
             (f"{{}}s mean_batch_time_cleaned (num_workers={self.num_workers})", self.mean_batch_time_cleaned),
         ]
-        max_digits = max(int(math.log10(tl[1])) for tl in time_lines)
+        max_digits = max(int(math.log10(tl[1] + 0.01)) for tl in time_lines)
         format_str = f"{{:{max_digits + 4}.2f}}"
         for i in range(len(time_lines)):
             lines.append(time_lines[i][0].format(format_str.format(time_lines[i][1])))
