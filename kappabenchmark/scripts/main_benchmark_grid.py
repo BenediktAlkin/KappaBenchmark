@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--batch_size", type=str, required=True)
     parser.add_argument("--num_workers", type=str, required=True)
     parser.add_argument("--num_fetch_workers", type=str, default="0")
-    parser.add_argument("--fetch_impl", type=str, choices=["asyncio", "threaded"], default="asyncio")
+    parser.add_argument("--fetch_impl", type=str, choices=["asyncio", "threaded"], default="threaded")
     # delay
     parser.add_argument("--initial_delay", type=int)
     return vars(parser.parse_args())
