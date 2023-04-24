@@ -9,14 +9,16 @@ import kappaprofiler as kp
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument("--dim", type=int, default=65536)
+    parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--device", type=int, default=0)
     return vars(parser.parse_args())
 
-def work(x):
-    x @ x
+def work(x, steps):
+    for step in range(steps):
+        x = x @ x
 
-def main(dim, epochs, device):
+def main(dim, steps, epochs, device):
     # setup logger
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -36,13 +38,13 @@ def main(dim, epochs, device):
     logging.info(f"warmup for {warmup_epochs} epochs")
     with kp.Stopwatch() as sw:
         for _ in tqdm(range(warmup_epochs)):
-            work(x)
+            work(x, steps)
     logging.info(f"warmup took {sw.elapsed_seconds} seconds")
 
     logging.info(f"start working")
     with kp.Stopwatch() as sw:
         for _ in tqdm(range(epochs)):
-            work(x)
+            work(x, steps)
     logging.info(f"work took {sw.elapsed_seconds} seconds")
 
 
