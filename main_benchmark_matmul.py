@@ -17,7 +17,7 @@ def parse_args():
 @torch.no_grad()
 def work(x, steps):
     for step in range(steps):
-        x = x @ x
+        x @ x
 
 def main(dim, steps, epochs, device):
     # setup logger
