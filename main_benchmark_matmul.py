@@ -5,6 +5,7 @@ from tqdm import tqdm
 import logging
 import sys
 import kappaprofiler as kp
+from time import sleep
 
 def parse_args():
     parser = ArgumentParser()
@@ -18,6 +19,7 @@ def parse_args():
 def work(x, steps):
     for step in range(steps):
         x @ x
+        sleep(0.01)
 
 def main(dim, steps, epochs, device):
     # setup logger
