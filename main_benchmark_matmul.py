@@ -15,11 +15,10 @@ def parse_args():
     parser.add_argument("--device", type=int, default=0)
     return vars(parser.parse_args())
 
-@torch.no_grad()
 def work(x, steps):
     for step in range(steps):
         x @ x
-        sleep(0.01)
+        torch.cuda.synchronize()
 
 def main(dim, steps, epochs, device):
     # setup logger
